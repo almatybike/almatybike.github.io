@@ -7,8 +7,41 @@ function init() {
         zoom: 13
     });
 
-    const stations = fetchStations();
+    checkBikeshare(map);
 
+    const checkBikes = new ymaps.control.Button({
+        data: {
+            image: './images/baseline_pedal_bike_black_18dp.png'
+        },
+        options: {
+            size: 'small',
+            selectOnClick: false,
+            floatIndex: 1
+        }
+    });
+    checkBikes.events.add('click', () => {
+        checkBikeshare(map);
+    });
+    map.controls.add(checkBikes);
+
+    const checkDocks = new ymaps.control.Button({
+        data: {
+            image: './images/baseline_local_parking_black_18dp.png'
+        },
+        options: {
+            size: 'small',
+            selectOnClick: false,
+            floatIndex: 0
+        }
+    });
+    checkDocks.events.add('click', () => {
+        checkBikeshare(map, 'docks');
+    });
+    map.controls.add(checkDocks);
+}
+
+function checkBikeshare(map, type = 'bikes') {
+    const stations = fetchStations();
     stations.then(stations => {
         stations.forEach(station => {
             if (station.is_deleted != 0) return;
@@ -18,13 +51,13 @@ function init() {
             } else if (station.is_not_active === "1") {
                 map.geoObjects.add(getMarker(station, 'is_not_active'));
             } else {
-                map.geoObjects.add(getMarker(station));
+                map.geoObjects.add(getMarker(station, 'ok', type));
             }
         });
     });
 }
 
-function getMarker(station, status = 'ok') {
+function getMarker(station, status, type) {
     if (status === 'is_sales') {
         return new ymaps.Placemark([43.239783, 76.927018], {}, {
             preset: 'islands#circleIcon',
@@ -55,7 +88,7 @@ function getMarker(station, status = 'ok') {
                 {weight: parseInt(station.free_slots), color: '#3d4e5a'},
                 {weight: parseInt(station.total_slots) - (parseInt(station.avl_bikes) + parseInt(station.free_slots)), color: '#c4c5c5'},
             ],
-            iconContent: parseInt(station.avl_bikes)
+            iconContent: ( type === 'bikes' ? parseInt(station.avl_bikes) : parseInt(station.free_slots) )
         }, {
             iconLayout: 'default#pieChart',
             iconPieChartRadius: 20,

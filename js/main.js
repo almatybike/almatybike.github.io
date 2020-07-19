@@ -59,9 +59,17 @@ function checkBikeshare(map, type = 'bikes') {
 
 function getMarker(station, status, type) {
     if (status === 'is_sales') {
-        return new ymaps.Placemark([43.239783, 76.927018], {}, {
+        return new ymaps.Placemark([43.239783, 76.927018], {
+            iconContent: '$',
+            balloonContent:
+                `<p>Дворец спорта и культуры имени Б. Шолака (пр. Абая, 44).<br />
+                Вход со стороны ул. Байтурсынова, 4 пост.<br />
+                <br /><br />
+                С 10:00 до 18:00 ежедневно, без выходных.<br />
+                Перерыв с 14:00 до 15:00.</p>`
+        }, {
             preset: 'islands#circleIcon',
-            iconColor: '#3caa3c'
+            iconColor: '#ff0000'
         });
     }
 
@@ -70,7 +78,8 @@ function getMarker(station, status, type) {
             data: [
                 {weight: parseInt(station.total_slots), color: '#c4c5c5'},
             ],
-            iconContent: ''
+            iconContent: '',
+            balloonContent: 'Станция заболела'
         }, {
             iconLayout: 'default#pieChart',
             iconPieChartRadius: 20,
@@ -82,13 +91,38 @@ function getMarker(station, status, type) {
     }
 
     if (status === 'ok') {
+
+        const avl_bikes = parseInt(station.avl_bikes);
+        const free_slots = parseInt(station.free_slots);
+        const total_slots = parseInt(station.total_slots);
+
+        let data, iconContent;
+
+        if (type === 'bikes') {
+            data = [
+                {weight: avl_bikes, color: '#79b834'},
+                {weight: free_slots, color: '#3d4e5a'},
+                {weight: total_slots - (avl_bikes + free_slots), color: '#c4c5c5'},
+            ];
+            iconContent = avl_bikes
+        }
+
+        if (type === 'docks') {
+            data = [
+                {weight: free_slots, color: '#3d4e5a'},
+                {weight: avl_bikes, color: '#79b834'},
+                {weight: total_slots - (avl_bikes + free_slots), color: '#c4c5c5'},
+            ];
+            iconContent = free_slots
+        }
+
         return new ymaps.Placemark([station.lat, station.lng], {
-            data: [
-                {weight: parseInt(station.avl_bikes), color: '#79b834'},
-                {weight: parseInt(station.free_slots), color: '#3d4e5a'},
-                {weight: parseInt(station.total_slots) - (parseInt(station.avl_bikes) + parseInt(station.free_slots)), color: '#c4c5c5'},
-            ],
-            iconContent: ( type === 'bikes' ? parseInt(station.avl_bikes) : parseInt(station.free_slots) )
+            data: data,
+            iconContent: iconContent,
+            balloonContent:
+                `<p>Доступно велосипедов: ${avl_bikes}</p>
+                <p>Доступно слотов: ${free_slots}</p>
+                <p>Всего слотов: ${total_slots}</p>`
         }, {
             iconLayout: 'default#pieChart',
             iconPieChartRadius: 20,

@@ -7,6 +7,16 @@ function init(){
         zoom: 13
     });
 
+    const geolocationControl = new ymaps.control.GeolocationControl();
+    geolocationControl.events.add('click', () => {
+        ymaps.gelocation.get({
+            provider: 'browser',
+            mapStateAutoApply: true
+        }).then(function (result) {
+            map.geoObjects.add(result.geoObjects);
+        });
+    });
+
     const stations = fetchStations();
 
     stations.then(stations => {

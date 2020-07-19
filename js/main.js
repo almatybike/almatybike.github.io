@@ -22,30 +22,6 @@ function init() {
             }
         });
     });
-
-    const geolocationButton = new ymaps.control.Button({
-        data: {
-            image: './images/baseline_near_me_black_18dp.png'
-        },
-        options: {
-            size: 'small',
-            selectOnClick: false
-        }
-    });
-    geolocationButton.events.add('click', () => {
-        ymaps.geolocation.get({
-            provider: 'browser'
-        }).then(result => {
-            const point = result.geoObjects.get(0).geometry.getCoordinates();
-            map.geoObjects.add(result.geoObjects)
-            map.setCenter(point);
-            map.setZoom(15);
-        });
-    }, err => {
-        console.log('Ошибка: ' + err)
-    });
-    map.controls.add(geolocationButton);
-
 }
 
 function getMarker(station, status = 'ok') {

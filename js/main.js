@@ -1,20 +1,10 @@
 ymaps.ready(init);
 
-function init(){
+function init() {
     let map = new ymaps.Map("map", {
         center: [43.237658, 76.913277],
-        controls: ['geolocationControl', 'typeSelector', 'fullscreenControl', 'zoomControl'],
+        controls: ['typeSelector', 'fullscreenControl', 'zoomControl'],
         zoom: 13
-    });
-
-    const geolocationControl = new ymaps.control.GeolocationControl();
-    geolocationControl.events.add('click', () => {
-        ymaps.gelocation.get({
-            provider: 'browser',
-            mapStateAutoApply: true
-        }).then(function (result) {
-            map.geoObjects.add(result.geoObjects);
-        });
     });
 
     const stations = fetchStations();
@@ -32,6 +22,30 @@ function init(){
             }
         });
     });
+
+    const geolocationButton = new ymaps.control.Button({
+        data: {
+            image: './images/baseline_near_me_black_18dp.png'
+        },
+        options: {
+            size: 'small',
+            selectOnClick: false
+        }
+    });
+    geolocationButton.events.add('click', () => {
+        ymaps.geolocation.get({
+            provider: 'browser'
+        }).then(result => {
+            const point = result.geoObjects.get(0).geometry.getCoordinates();
+            map.geoObjects.add(result.geoObjects)
+            map.setCenter(point);
+            map.setZoom(15);
+        });
+    }, err => {
+        console.log('Ошибка: ' + err)
+    });
+    map.controls.add(geolocationButton);
+
 }
 
 function getMarker(station, status = 'ok') {

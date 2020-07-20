@@ -11,7 +11,7 @@ function init() {
 
     const checkBikes = new ymaps.control.Button({
         data: {
-            image: './images/baseline_pedal_bike_black_18dp.png'
+            image: '/images/baseline_pedal_bike_black_18dp.png'
         },
         options: {
             size: 'small',
@@ -24,7 +24,7 @@ function init() {
 
     const checkDocks = new ymaps.control.Button({
         data: {
-            image: './images/baseline_local_parking_black_18dp.png'
+            image: '/images/baseline_local_parking_black_18dp.png'
         },
         options: {
             size: 'small',

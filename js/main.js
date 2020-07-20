@@ -15,13 +15,10 @@ function init() {
         },
         options: {
             size: 'small',
-            selectOnClick: false,
             floatIndex: 1
         }
     });
-    checkBikes.events.add('click', () => {
-        checkBikeshare(map);
-    });
+    checkBikes.select();
     map.controls.add(checkBikes);
 
     const checkDocks = new ymaps.control.Button({
@@ -30,14 +27,21 @@ function init() {
         },
         options: {
             size: 'small',
-            selectOnClick: false,
             floatIndex: 0
         }
     });
+    map.controls.add(checkDocks);
+
+    checkBikes.events.add('click', () => {
+        map.geoObjects.removeAll();
+        checkDocks.deselect();
+        checkBikeshare(map);
+    });
     checkDocks.events.add('click', () => {
+        map.geoObjects.removeAll();
+        checkBikes.deselect();
         checkBikeshare(map, 'docks');
     });
-    map.controls.add(checkDocks);
 }
 
 function checkBikeshare(map, type = 'bikes') {
@@ -62,14 +66,15 @@ function getMarker(station, status, type) {
         return new ymaps.Placemark([43.239783, 76.927018], {
             iconContent: '$',
             balloonContent:
-                `<p>Дворец спорта и культуры имени Б. Шолака (пр. Абая, 44).<br />
-                Вход со стороны ул. Байтурсынова, 4 пост.<br />
-                <br /><br />
-                С 10:00 до 18:00 ежедневно, без выходных.<br />
+                `<p>Отдел продаж</p>
+                <p>Проспект Абая, 44<br />
+                Спортивно-культурный комплекс им. Балуана Шолака<br />
+                Вход со стороны ул. Байтурсынова, 4 пост.</p>
+                <p>С 10:00 до 18:00 ежедневно, без выходных.<br />
                 Перерыв с 14:00 до 15:00.</p>`
         }, {
             preset: 'islands#circleIcon',
-            iconColor: '#ff0000'
+            iconColor: '#ff0000',
         });
     }
 
@@ -79,14 +84,17 @@ function getMarker(station, status, type) {
                 {weight: parseInt(station.total_slots), color: '#c4c5c5'},
             ],
             iconContent: '',
-            balloonContent: 'Станция заболела'
+            balloonContent:
+                `<p>Станция ${station.code}<br />${station.name_ru}</p>
+                <p>Станция заболела</p>`
         }, {
             iconLayout: 'default#pieChart',
             iconPieChartRadius: 20,
             iconPieChartCoreRadius: 10,
             iconPieChartCoreFillStyle: '#ffffff',
             iconPieChartStrokeStyle: '',
-            iconPieChartStrokeWidth: 0
+            iconPieChartStrokeWidth: 0,
+            zIndex: -5
         });
     }
 
@@ -96,23 +104,56 @@ function getMarker(station, status, type) {
         const free_slots = parseInt(station.free_slots);
         const total_slots = parseInt(station.total_slots);
 
-        let data, iconContent;
+        let data = [];
+        let iconContent = '';
 
         if (type === 'bikes') {
-            data = [
-                {weight: avl_bikes, color: '#79b834'},
-                {weight: free_slots, color: '#3d4e5a'},
-                {weight: total_slots - (avl_bikes + free_slots), color: '#c4c5c5'},
-            ];
+            if (total_slots > 10) {
+                for (let i = 0; i < Math.round((avl_bikes * 10) / total_slots); i++) {
+                    data.push({weight: 1, color: '#79b834'})
+                }
+                for (let i = 0; i < Math.round((free_slots * 10) / total_slots); i++) {
+                    data.push({weight: 1, color: '#3d4e5a'})
+                }
+                for (let i = 0; i < Math.round((total_slots - (avl_bikes + free_slots)) / total_slots); i++) {
+                    data.push({weight: 1, color: '#c4c5c5'})
+                }
+            } else {
+                for (let i = 0; i < avl_bikes; i++) {
+                    data.push({weight: 1, color: '#79b834'})
+                }
+                for (let i = 0; i < free_slots; i++) {
+                    data.push({weight: 1, color: '#3d4e5a'})
+                }
+                for (let i = 0; i < (total_slots - (avl_bikes + free_slots)); i++) {
+                    data.push({weight: 1, color: '#c4c5c5'})
+                }
+            }
             iconContent = avl_bikes
         }
 
         if (type === 'docks') {
-            data = [
-                {weight: free_slots, color: '#3d4e5a'},
-                {weight: avl_bikes, color: '#79b834'},
-                {weight: total_slots - (avl_bikes + free_slots), color: '#c4c5c5'},
-            ];
+            if (total_slots > 10) {
+                for (let i = 0; i < Math.round((free_slots * 10) / total_slots); i++) {
+                    data.push({weight: 1, color: '#79b834'})
+                }
+                for (let i = 0; i < Math.round((avl_bikes * 10) / total_slots); i++) {
+                    data.push({weight: 1, color: '#3d4e5a'})
+                }
+                for (let i = 0; i < Math.round((total_slots - (avl_bikes + free_slots)) / total_slots); i++) {
+                    data.push({weight: 1, color: '#c4c5c5'})
+                }
+            } else {
+                for (let i = 0; i < free_slots; i++) {
+                    data.push({weight: 1, color: '#79b834'})
+                }
+                for (let i = 0; i < avl_bikes; i++) {
+                    data.push({weight: 1, color: '#3d4e5a'})
+                }
+                for (let i = 0; i < (total_slots - (avl_bikes + free_slots)); i++) {
+                    data.push({weight: 1, color: '#c4c5c5'})
+                }
+            }
             iconContent = free_slots
         }
 
@@ -120,16 +161,17 @@ function getMarker(station, status, type) {
             data: data,
             iconContent: iconContent,
             balloonContent:
-                `<p>Доступно велосипедов: ${avl_bikes}</p>
-                <p>Доступно слотов: ${free_slots}</p>
-                <p>Всего слотов: ${total_slots}</p>`
+                `<p>Станция ${station.code}<br />${station.name_ru}</p>
+                <p>Доступно велосипедов: ${avl_bikes}<br />
+                Доступно слотов: ${free_slots}<br />
+                Всего слотов: ${total_slots}</p>`
         }, {
             iconLayout: 'default#pieChart',
             iconPieChartRadius: 20,
             iconPieChartCoreRadius: 10,
             iconPieChartCoreFillStyle: '#ffffff',
-            iconPieChartStrokeStyle: '',
-            iconPieChartStrokeWidth: 0
+            iconPieChartStrokeStyle: '#3d4e5a',
+            iconPieChartStrokeWidth: 1
         });
     }
 }

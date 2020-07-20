@@ -15,7 +15,8 @@ function init() {
         },
         options: {
             size: 'small',
-            floatIndex: 1
+            floatIndex: 1,
+            selectOnClick: false
         }
     });
     checkBikes.select();
@@ -27,17 +28,20 @@ function init() {
         },
         options: {
             size: 'small',
-            floatIndex: 0
+            floatIndex: 0,
+            selectOnClick: false
         }
     });
     map.controls.add(checkDocks);
 
-    checkBikes.events.add('click', () => {
+    checkBikes.events.add('click', (e) => {
+        checkBikes.select();
         map.geoObjects.removeAll();
         checkDocks.deselect();
         checkBikeshare(map);
     });
     checkDocks.events.add('click', () => {
+        checkDocks.select();
         map.geoObjects.removeAll();
         checkBikes.deselect();
         checkBikeshare(map, 'docks');

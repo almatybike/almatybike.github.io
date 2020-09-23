@@ -49,33 +49,37 @@ function init() {
 }
 
 function checkBikeshare(map, type = 'bikes') {
-    const stations = fetchStations();
-    stations.then(stations => {
-        stations.forEach(station => {
-            if (station.is_deleted != 0) return;
-            if (station.is_hidden != 0) return;
-            if (station.is_sales === '1') {
-                map.geoObjects.add(getMarker(station, 'is_sales'));
-            } else if (station.is_not_active === "1") {
-                map.geoObjects.add(getMarker(station, 'is_not_active'));
-            } else {
-                map.geoObjects.add(getMarker(station, 'ok', type));
-            }
-        });
-    });
+    
+    const URL = 'https://almatybike.kz/velostation';
+
+    $.get( URL, function (data) {
+
+            const stations = $(data).find('.table-stations tbody tr');
+
+            stations.each(function() {
+                    const station = $(this);
+                    if (station.data('sales') === 1) {
+                        map.geoObjects.add(getMarker(station, 'is_sales'));
+                    } else if (station.data('inactive') === 1) {
+                        map.geoObjects.add(getMarker(station, 'is_not_active'));
+                    } else {
+                        map.geoObjects.add(getMarker(station, 'ok', type));
+                    }
+                });
+        }, 'html' )
+            .fail( function() {
+                console.log( 'url parsing error' )
+            });
 }
 
 function getMarker(station, status, type) {
+
+    const coordinates = [station.data('latitude'), station.data('longitude')];
+
     if (status === 'is_sales') {
-        return new ymaps.Placemark([43.239783, 76.927018], {
+        return new ymaps.Placemark(coordinates, {
             iconContent: '$',
-            balloonContent:
-                `<p>Отдел продаж</p>
-                <p>Проспект Абая, 44<br />
-                Спортивно-культурный комплекс им. Балуана Шолака<br />
-                Вход со стороны ул. Байтурсынова, 4 пост.</p>
-                <p>С 10:00 до 18:00 ежедневно, без выходных.<br />
-                Перерыв с 14:00 до 15:00.</p>`
+            balloonContent: (station.find('.address').text())
         }, {
             preset: 'islands#circleIcon',
             iconColor: '#ff0000',
@@ -83,13 +87,13 @@ function getMarker(station, status, type) {
     }
 
     if (status === 'is_not_active') {
-        return new ymaps.Placemark([station.lat, station.lng], {
+        return new ymaps.Placemark(coordinates, {
             data: [
-                {weight: parseInt(station.total_slots), color: '#c4c5c5'},
+                {weight: parseInt(station.data('total-slots')), color: '#c4c5c5'},
             ],
             iconContent: '',
             balloonContent:
-                `<p>Станция ${station.code}<br />${station.name_ru}</p>
+                `<p>Станция ${station.find('.code').text()}<br />${station.find('.name').contents().first().text()}</p>
                 <p>Станция заболела</p>`
         }, {
             iconLayout: 'default#pieChart',
@@ -104,9 +108,9 @@ function getMarker(station, status, type) {
 
     if (status === 'ok') {
 
-        const avl_bikes = parseInt(station.avl_bikes);
-        const free_slots = parseInt(station.free_slots);
-        const total_slots = parseInt(station.total_slots);
+        const avl_bikes = parseInt(station.find('.avl-bikes').text());
+        const free_slots = parseInt(station.find('.free-slots').text());
+        const total_slots = parseInt(station.data('total-slots'));
 
         let data = [];
         let iconContent = '';
@@ -161,11 +165,11 @@ function getMarker(station, status, type) {
             iconContent = free_slots
         }
 
-        return new ymaps.Placemark([station.lat, station.lng], {
+        return new ymaps.Placemark(coordinates, {
             data: data,
             iconContent: iconContent,
             balloonContent:
-                `<p>Станция ${station.code}<br />${station.name_ru}</p>
+                `<p>Станция ${station.find('.code').text()}<br />${station.find('.name').contents().first().text()}</p>
                 <p>Доступно велосипедов: ${avl_bikes}<br />
                 Доступно слотов: ${free_slots}<br />
                 Всего слотов: ${total_slots}</p>`
@@ -178,16 +182,4 @@ function getMarker(station, status, type) {
             iconPieChartStrokeWidth: 1
         });
     }
-}
-
-async function fetchStations() {
-    const response = await fetch('https://almatybike.kz/api/stations/get', {
-        method: "GET",
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-        },
-    });
-    const stations = await response.json();
-    return stations;
 }

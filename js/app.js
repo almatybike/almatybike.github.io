@@ -6,3 +6,19 @@ if ('serviceWorker' in navigator) {
             console.log('ServiceWorker registration failed: ', err);
         });
 }
+
+window.addEventListener("load", () => {
+
+    const offline = document.getElementById('offline');
+
+    function handleNetworkChange(event) {
+        if (navigator.onLine) {
+            offline.classList.add('hidden');
+        } else {
+            offline.classList.remove('hidden');
+        }
+    }
+
+    window.addEventListener('online', handleNetworkChange);
+    window.addEventListener('offline', handleNetworkChange);
+});

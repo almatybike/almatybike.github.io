@@ -1,16 +1,17 @@
-const staticCacheName = 'site-static-v5';
+const staticCacheName = 'site-static-v10';
 const dynamicCacheName = 'site-dynamic-v1';
 const assets = [
     '/',
     '/index.html',
     '/js/app.js',
     '/js/main.js',
+    '/img/wifi_off-24px.svg',
     '/css/styles.css',
     '/img/baseline_local_parking_black_18dp.png',
     '/img/baseline_pedal_bike_black_18dp.png',
     '/img/favicon.png',
     'https://code.jquery.com/jquery-3.5.0.js',
-    '/fallback.html'
+    '/fallback.html',
 ];
 
 const limitCacheSize = (name, size) => {

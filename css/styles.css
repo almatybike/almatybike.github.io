@@ -1,9 +1,35 @@
 body {
     margin: 0;
     padding: 0;
+    font: 400 16px Source Sans Pro, sans-serif;
 }
 
 #map {
     width: 100vw;
     height: 100vh;
+}
+
+.offline-badge {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    -webkit-box-shadow: 0px 10px 20px 0px rgba(0,0,0,0.19);
+    -moz-box-shadow: 0px 10px 20px 0px rgba(0,0,0,0.19);
+    box-shadow: 0px 10px 20px 0px rgba(0,0,0,0.19);
+}
+
+.container {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    position: fixed;
+    top: 30px;
+}
+
+.hidden {
+    display: none;
 }

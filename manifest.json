@@ -48,5 +48,16 @@
             "type": "image/png",
             "sizes": "512x512"
         }
-    ]
+    ],
+    "url": "https://almatybike.github.io/",
+    "lang": "Russian",
+    "categories": ["lifestyle", "navigation", "social", "travel"],
+    "screenshots": [
+        {
+            "src": "/img/screenshot.png",
+            "sizes": "750x1334",
+            "type": "image/png"
+        }
+    ],
+    "description": "Карта станции системы Almaty Bike"
 }

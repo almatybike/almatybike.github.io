@@ -11,7 +11,7 @@ function init() {
 
     const checkBikes = new ymaps.control.Button({
         data: {
-            image: '/images/baseline_pedal_bike_black_18dp.png'
+            image: '/img/baseline_pedal_bike_black_18dp.png'
         },
         options: {
             size: 'small',
@@ -24,7 +24,7 @@ function init() {
 
     const checkDocks = new ymaps.control.Button({
         data: {
-            image: '/images/baseline_local_parking_black_18dp.png'
+            image: '/img/baseline_local_parking_black_18dp.png'
         },
         options: {
             size: 'small',
@@ -52,9 +52,9 @@ function checkBikeshare(map, type = 'bikes') {
     
     const URL = 'https://almatybike.kz/velostation';
 
-    $.get( URL, function (data) {
-
-            const stations = $(data).find('.table-stations tbody tr');
+    $.get( URL, function(data) {
+            var ownerDocument = document.implementation.createHTMLDocument('virtual');
+            const stations = $(data, ownerDocument).find('.table-stations tbody tr');
 
             stations.each(function() {
                     const station = $(this);

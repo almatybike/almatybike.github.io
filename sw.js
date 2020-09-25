@@ -1,4 +1,4 @@
-const staticCacheName = 'site-static-v10';
+const staticCacheName = 'site-static-v12';
 const dynamicCacheName = 'site-dynamic-v1';
 const assets = [
     '/',

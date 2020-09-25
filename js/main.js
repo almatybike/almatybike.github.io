@@ -109,7 +109,8 @@ function getMarker(station, status, type) {
     if (status === 'ok') {
 
         const avl_bikes = parseInt(station.find('.avl-bikes').text());
-        console.log(avl_bikes)
+        console.log(station.find('.avl-bikes'))
+        console.log(station.find('.avl-bikes').text())
         const free_slots = parseInt(station.find('.free-slots').text());
         const total_slots = parseInt(station.data('total-slots'));
 
